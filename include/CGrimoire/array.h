@@ -12,18 +12,26 @@ typedef struct cg_array_t cg_array_t;
 /// @param capacity how many elements to store.
 /// @param element_size_in_bytes how many Bytes each element occupy. use sizeof()
 /// @return return a heap allocated array, that will need to be cleared with cg_array_destroy().
+/// can return NULL if the memory allocation fails.
 cg_array_t *cg_array_create(size_t capacity, size_t element_size_in_bytes);
 
 /// @brief create a copy of OTHER, the OTHER isn't mutated, the ownership is yours
 /// @param other the cg_array to copy from.
 /// @return return a heap copy of the OTHER array, that will need to be cleared with cg_array_destroy().
+/// can return NULL if the memory allocation fails or OTHER is a invalid cg_array_t.
 cg_array_t *cg_array_copy(const cg_array_t *other);
+
+/// @brief resizes a cg_array_t to be NEW_SIZE long
+/// @param array a initialized cg_array_t.
+/// @param new_size
+/// @return true if successful, can fail on memory allocation or when passed a invalid ARRAY.
+bool cg_array_reserve(cg_array_t *array, size_t new_size);
 
 /// @brief gets the element at INDEX from ARRAY and puts its value into DEST.
 /// @param array cg_array to search element from.
 /// @param index index of the element in the ARRAY.
 /// @param dest a pointer to a variable with the same datatype as the ones stored in the array. use AS_MEMORY(x) to pass the variable to store the element.
-/// @return true if successful
+/// @return true if successful, can fail if ARRAY or DEST are invalid pointers or index is bigger than the array.
 bool cg_array_at(const cg_array_t *array, size_t index, byte_t *dest);
 
 /// @brief insert the DATA value into the INDEX position of the ARRAY
@@ -44,6 +52,8 @@ size_t cg_array_size(const cg_array_t *array);
 /// @return true if successful
 bool cg_array_assign(cg_array_t *array, const byte_t *c_array);
 
+bool cg_array_assign_range(cg_array_t *array, size_t start, const byte_t *c_array, size_t c_array_sizes);
+
 /// @brief swaps the contents of DEST with SOURCE
 /// @return true if successful
 bool cg_array_swap(cg_array_t *dest, cg_array_t *source);
@@ -53,6 +63,13 @@ bool cg_array_swap(cg_array_t *dest, cg_array_t *source);
 /// @param value a pointer to the value to be stored, use AS_MEMORY(<var>).
 /// @return true if successful.
 bool cg_array_fill(cg_array_t *array, const byte_t *value);
+
+/// @brief resizes ARRAY to NEW_SIZE and assigns the default value DATA, if NEW_SIZE < ARRAY's capacity does nothing.
+/// @param array a cg_array_t
+/// @param new_size new_size to ARRAY
+/// @param data a pointer to the data to used as default values.
+/// @return true if successful, can fail if memory allocation fails or invalid DATA or ARRAY are passed.
+bool cg_array_resize(cg_array_t *array, size_t new_size, const byte_t *data);
 
 /// @brief free appropriately a instance of cg_array_t.
 /// @param array the cg_array_t.

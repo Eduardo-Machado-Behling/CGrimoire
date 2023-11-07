@@ -1,4 +1,5 @@
 #include "CGrimoire/array.h"
+#include <stdio.h>
 
 typedef struct cg_array_t {
     struct {
@@ -34,6 +35,22 @@ cg_array_t *cg_array_copy(const cg_array_t *other) {
     memcpy(array->data.mem, other->data.mem, array->capacity * array->data.size);
 
     return array;
+}
+
+bool cg_array_reserve(cg_array_t *array, size_t new_size) {
+    if (!array)
+        return false;
+
+    array->capacity = new_size;
+    if (!array->data.mem)
+        array->data.mem = calloc(array->capacity, array->data.size);
+    else
+        array->data.mem = realloc(array->data.mem, array->capacity * array->data.size);
+
+    if (!array->data.mem)
+        return false;
+
+    return true;
 }
 
 bool cg_array_at(const cg_array_t *array, size_t index, byte_t *dest) {
@@ -77,6 +94,20 @@ bool cg_array_assign(cg_array_t *array, const byte_t *c_array) {
     memcpy(array->data.mem, c_array, array->capacity * array->data.size);
     return true;
 }
+
+bool cg_array_assign_range(cg_array_t *array, size_t start, const byte_t *c_array, size_t c_array_sizes) {
+    if (!array || !c_array)
+        return false;
+
+    int diff = start + c_array_sizes - array->capacity;
+    if (diff > 0)
+        cg_array_reserve(array, array->capacity + diff);
+
+    byte_t *array_start = array->data.mem + start * array->data.size;
+    memcpy(array_start, c_array, c_array_sizes * array->data.size);
+    return true;
+}
+
 bool cg_array_swap(cg_array_t *dest, cg_array_t *source) {
     byte_t *mem_temp = dest->data.mem;
     dest->data.mem = source->data.mem;
@@ -99,6 +130,30 @@ bool cg_array_fill(cg_array_t *array, const byte_t *value) {
     for (size_t i = 0; i < array->capacity; i++) {
         size_t index = i * array->data.size;
         memcpy(array->data.mem + index, value, array->data.size);
+    }
+
+    return true;
+}
+
+bool cg_array_resize(cg_array_t *array, size_t new_size, const byte_t *data) {
+    if (!array || !data)
+        return false;
+
+    if (new_size > array->capacity) {
+        if (!array->data.mem)
+            array->data.mem = calloc(new_size, array->data.size);
+        else
+            array->data.mem = realloc(array->data.mem, new_size * array->data.size);
+
+        if (!array->data.mem) {
+            array->data.mem = NULL;
+            return false;
+        }
+
+        for (size_t i = array->capacity; i < new_size; i++)
+            memcpy(array->data.mem + (i * array->data.size), data, array->data.size);
+
+        array->capacity = new_size;
     }
 
     return true;

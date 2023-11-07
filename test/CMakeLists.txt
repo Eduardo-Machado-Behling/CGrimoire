@@ -1,10 +1,14 @@
-add_executable(test1
-  main.c
-)
+macro(test_component name)
+  add_executable(test_${name}
+    ${name}.c
+  )
 
-target_link_libraries(test1
-  CGrimoire
-  Unity
-)
+  target_link_libraries(test_${name}
+    CGrimoire
+    Unity
+  )
 
-add_test(suite_1_test test1)
+  add_test(suite_${name} test_${name})  
+endmacro(test_component)
+
+test_component(array)

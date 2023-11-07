@@ -59,6 +59,64 @@ void test_CGArray_assign(void) {
     }
 }
 
+void test_CGArray_assign_range(void) {
+    cg_array_t *a = cg_array_create(5, sizeof(int));
+    int b = 0;
+    cg_array_fill(a, AS_MEMORY(b));
+    int data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign_range(a, 5, AS_MEMORY(data), 10), "FAILED ASSIGN_RANGE");
+
+    for (int i = 0; i < cg_array_size(a); i++) {
+        int v;
+        cg_array_at(a, i, AS_MEMORY(v));
+        if (i < 5)
+            TEST_ASSERT_EQUAL_INT32_MESSAGE(v, 0, "VALUES ARE DIFFERENT BEFORE ASSIGN_RANGE");
+        else
+            TEST_ASSERT_EQUAL_INT32_MESSAGE(v, i - 4, "VALUES ARE DIFFERENT AFTER ASSIGN_RANGE");
+    }
+
+    cg_array_destroy(a);
+}
+
+void test_CGArray_reserve(void) {
+    cg_array_t *src = cg_array_create(10, sizeof(int32_t));
+
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_reserve(src, 15), "FAILED ASSIGN");
+
+    TEST_ASSERT_EQUAL_size_t_MESSAGE(15, cg_array_size(src), "cg_array_size returned wrong");
+    int32_t v = 24;
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_fill(src, AS_MEMORY(v)), "cg_array_fill failed after cg_array_reserve");
+
+    for (size_t i = 0; i < cg_array_size(src); i++) {
+        int r;
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(src, i, AS_MEMORY(r)), "cg_array_at failed after cg_array_reserve");
+        TEST_ASSERT_EQUAL_INT_MESSAGE(v, r, "cg_array_at returned wrong val after cg_array_reserve");
+    }
+
+    cg_array_destroy(src);
+}
+
+void test_CGArray_resize(void) {
+    cg_array_t *src = cg_array_create(10, sizeof(int32_t));
+
+    int32_t v = 314;
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_fill(src, AS_MEMORY(v)), "FAILED ASSIGN");
+    v = 2004;
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_resize(src, 15, AS_MEMORY(v)), "FAILED ASSIGN");
+
+    for (size_t i = 0; i < cg_array_size(src); i++) {
+        int r;
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(src, i, AS_MEMORY(r)), "cg_array_at failed after cg_array_resize");
+        if (i < 10)
+            TEST_ASSERT_EQUAL_INT_MESSAGE(314, r, "cg_array_at returned wrong val after cg_array_resize");
+        else
+            TEST_ASSERT_EQUAL_INT_MESSAGE(2004, r, "cg_array_at returned wrong val after cg_array_resize");
+    }
+
+    cg_array_destroy(src);
+}
+
 void test_CGArray_swap(void) {
     cg_array_t *src = cg_array_create(10, sizeof(int32_t));
     int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -75,6 +133,7 @@ void test_CGArray_swap(void) {
         cg_array_at(array, i, AS_MEMORY(v));
         TEST_ASSERT_EQUAL_INT32_MESSAGE(v, i + 1, "VALUES ARE DIFFERENT AFTER SWAP");
     }
+    cg_array_destroy(src);
 }
 
 void tearDown(void) { cg_array_destroy(array); }
@@ -85,7 +144,10 @@ int main(void) {
     RUN_TEST(test_CGArray_insert);
     RUN_TEST(test_CGArray_copy);
     RUN_TEST(test_CGArray_fill);
+    RUN_TEST(test_CGArray_reserve);
+    RUN_TEST(test_CGArray_resize);
     RUN_TEST(test_CGArray_assign);
+    RUN_TEST(test_CGArray_assign_range);
 
     return UNITY_END();
 }
