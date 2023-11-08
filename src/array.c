@@ -11,9 +11,9 @@ typedef struct cg_array_t {
 
 cg_array_t *cg_array_create(size_t capacity, size_t element_size_in_bytes) {
     cg_array_t *array;
-    SAFE_ALLOC(array, sizeof(cg_array_t), return NULL);
+    CG_SAFE_ALLOC(array, sizeof(cg_array_t), return NULL);
 
-    SAFE_ALLOC(array->data.mem, element_size_in_bytes * capacity, free(array); return NULL);
+    CG_SAFE_ALLOC(array->data.mem, element_size_in_bytes * capacity, free(array); return NULL);
     array->data.size = element_size_in_bytes;
 
     array->capacity = capacity;
@@ -26,12 +26,12 @@ cg_array_t *cg_array_copy(const cg_array_t *other) {
         return NULL;
 
     cg_array_t *array;
-    SAFE_ALLOC(array, sizeof(cg_array_t), return NULL);
+    CG_SAFE_ALLOC(array, sizeof(cg_array_t), return NULL);
 
     array->data.size = other->data.size;
     array->capacity = other->capacity;
 
-    SAFE_ALLOC(array->data.mem, array->capacity * array->data.size, free(array); return NULL);
+    CG_SAFE_ALLOC(array->data.mem, array->capacity * array->data.size, free(array); return NULL);
     memcpy(array->data.mem, other->data.mem, array->capacity * array->data.size);
 
     return array;
@@ -81,10 +81,16 @@ bool cg_array_insert(cg_array_t *array, size_t index, const byte_t *data) {
     return true;
 }
 
-size_t cg_array_size(const cg_array_t *array) {
+size_t cg_array_capacity(const cg_array_t *array) {
     if (!array)
-        return CG_ARRAY_NPOS;
+        return CG_ARRAY_INVALID_POS;
     return array->capacity;
+}
+
+size_t cg_array_element_size(const cg_array_t *array) {
+    if (!array)
+        return CG_ARRAY_INVALID_POS;
+    return array->data.size;
 }
 
 bool cg_array_assign(cg_array_t *array, const byte_t *c_array) {
@@ -145,10 +151,8 @@ bool cg_array_resize(cg_array_t *array, size_t new_size, const byte_t *data) {
         else
             array->data.mem = realloc(array->data.mem, new_size * array->data.size);
 
-        if (!array->data.mem) {
-            array->data.mem = NULL;
+        if (!array->data.mem)
             return false;
-        }
 
         for (size_t i = array->capacity; i < new_size; i++)
             memcpy(array->data.mem + (i * array->data.size), data, array->data.size);

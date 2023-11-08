@@ -12,3 +12,4 @@ macro(test_component name)
 endmacro(test_component)
 
 test_component(array)
+test_component(vector)

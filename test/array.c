@@ -6,22 +6,22 @@ cg_array_t *array;
 void setUp(void) { array = cg_array_create(10, sizeof(int32_t)); }
 
 void test_CGArray_copy(void) {
-    for (size_t i = 0; i < cg_array_size(array); i++) {
+    for (size_t i = 0; i < cg_array_capacity(array); i++) {
         int32_t val = i * 5;
-        TEST_ASSERT_TRUE_MESSAGE(cg_array_insert(array, i, AS_MEMORY(val)), "FAILED INSERT ON LOOP");
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_insert(array, i, CG_AS_MEMORY(val)), "FAILED INSERT ON LOOP");
     }
 
-    for (size_t i = 0; i < cg_array_size(array); i++) {
+    for (size_t i = 0; i < cg_array_capacity(array); i++) {
         int val;
-        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(array, i, AS_MEMORY(val)), "FAILED AT ON LOOP");
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(array, i, CG_AS_MEMORY(val)), "FAILED AT ON LOOP");
         TEST_ASSERT_EQUAL_INT32_MESSAGE(i * 5, val, "AT IN LOOP RETURNED WRONG NUMBER");
     }
 
     cg_array_t *copied = cg_array_copy(array);
-    for (size_t i = 0; i < cg_array_size(array); i++) {
+    for (size_t i = 0; i < cg_array_capacity(array); i++) {
         int val_copied, val_array;
-        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(array, i, AS_MEMORY(val_array)), "FAILED ARRAY.AT ON COMPARE LOOP");
-        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(copied, i, AS_MEMORY(val_copied)), "FAILED COPIED.AT ON COMPARE LOOP");
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(array, i, CG_AS_MEMORY(val_array)), "FAILED ARRAY.AT ON COMPARE LOOP");
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(copied, i, CG_AS_MEMORY(val_copied)), "FAILED COPIED.AT ON COMPARE LOOP");
         TEST_ASSERT_EQUAL_INT32_MESSAGE(val_array, val_copied, "VALUES ARE DIFFERENT ON COPY");
     }
 
@@ -30,19 +30,19 @@ void test_CGArray_copy(void) {
 
 void test_CGArray_insert(void) {
     int a = 5;
-    TEST_ASSERT_TRUE(cg_array_insert(array, 0, AS_MEMORY(a)));
+    TEST_ASSERT_TRUE(cg_array_insert(array, 0, CG_AS_MEMORY(a)));
     int b = -1;
-    cg_array_at(array, 0, AS_MEMORY(b));
+    cg_array_at(array, 0, CG_AS_MEMORY(b));
     TEST_ASSERT_EQUAL_INT32(a, b);
 }
 
 void test_CGArray_fill(void) {
     int a = 363;
-    TEST_ASSERT_TRUE(cg_array_fill(array, AS_MEMORY(a)));
+    TEST_ASSERT_TRUE(cg_array_fill(array, CG_AS_MEMORY(a)));
 
-    for (size_t i = 0; i < cg_array_size(array); i++) {
+    for (size_t i = 0; i < cg_array_capacity(array); i++) {
         int b = -1;
-        cg_array_at(array, 0, AS_MEMORY(b));
+        cg_array_at(array, 0, CG_AS_MEMORY(b));
         TEST_ASSERT_EQUAL_INT32(a, b);
     }
 }
@@ -50,11 +50,11 @@ void test_CGArray_fill(void) {
 void test_CGArray_assign(void) {
     int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign(array, AS_MEMORY(a)), "FAILED ASSIGN");
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign(array, CG_AS_MEMORY(a)), "FAILED ASSIGN");
 
     for (int i = 0; i < 10; i++) {
         int v;
-        cg_array_at(array, i, AS_MEMORY(v));
+        cg_array_at(array, i, CG_AS_MEMORY(v));
         TEST_ASSERT_EQUAL_INT32_MESSAGE(v, i + 1, "VALUES ARE DIFFERENT AFTER ASSIGN");
     }
 }
@@ -62,14 +62,14 @@ void test_CGArray_assign(void) {
 void test_CGArray_assign_range(void) {
     cg_array_t *a = cg_array_create(5, sizeof(int));
     int b = 0;
-    cg_array_fill(a, AS_MEMORY(b));
+    cg_array_fill(a, CG_AS_MEMORY(b));
     int data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign_range(a, 5, AS_MEMORY(data), 10), "FAILED ASSIGN_RANGE");
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign_range(a, 5, CG_AS_MEMORY(data), 10), "FAILED ASSIGN_RANGE");
 
-    for (int i = 0; i < cg_array_size(a); i++) {
+    for (int i = 0; i < cg_array_capacity(a); i++) {
         int v;
-        cg_array_at(a, i, AS_MEMORY(v));
+        cg_array_at(a, i, CG_AS_MEMORY(v));
         if (i < 5)
             TEST_ASSERT_EQUAL_INT32_MESSAGE(v, 0, "VALUES ARE DIFFERENT BEFORE ASSIGN_RANGE");
         else
@@ -84,13 +84,13 @@ void test_CGArray_reserve(void) {
 
     TEST_ASSERT_TRUE_MESSAGE(cg_array_reserve(src, 15), "FAILED ASSIGN");
 
-    TEST_ASSERT_EQUAL_size_t_MESSAGE(15, cg_array_size(src), "cg_array_size returned wrong");
+    TEST_ASSERT_EQUAL_size_t_MESSAGE(15, cg_array_capacity(src), "cg_array_capacity returned wrong");
     int32_t v = 24;
-    TEST_ASSERT_TRUE_MESSAGE(cg_array_fill(src, AS_MEMORY(v)), "cg_array_fill failed after cg_array_reserve");
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_fill(src, CG_AS_MEMORY(v)), "cg_array_fill failed after cg_array_reserve");
 
-    for (size_t i = 0; i < cg_array_size(src); i++) {
+    for (size_t i = 0; i < cg_array_capacity(src); i++) {
         int r;
-        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(src, i, AS_MEMORY(r)), "cg_array_at failed after cg_array_reserve");
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(src, i, CG_AS_MEMORY(r)), "cg_array_at failed after cg_array_reserve");
         TEST_ASSERT_EQUAL_INT_MESSAGE(v, r, "cg_array_at returned wrong val after cg_array_reserve");
     }
 
@@ -101,13 +101,13 @@ void test_CGArray_resize(void) {
     cg_array_t *src = cg_array_create(10, sizeof(int32_t));
 
     int32_t v = 314;
-    TEST_ASSERT_TRUE_MESSAGE(cg_array_fill(src, AS_MEMORY(v)), "FAILED ASSIGN");
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_fill(src, CG_AS_MEMORY(v)), "FAILED ASSIGN");
     v = 2004;
-    TEST_ASSERT_TRUE_MESSAGE(cg_array_resize(src, 15, AS_MEMORY(v)), "FAILED ASSIGN");
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_resize(src, 15, CG_AS_MEMORY(v)), "FAILED ASSIGN");
 
-    for (size_t i = 0; i < cg_array_size(src); i++) {
+    for (size_t i = 0; i < cg_array_capacity(src); i++) {
         int r;
-        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(src, i, AS_MEMORY(r)), "cg_array_at failed after cg_array_resize");
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(src, i, CG_AS_MEMORY(r)), "cg_array_at failed after cg_array_resize");
         if (i < 10)
             TEST_ASSERT_EQUAL_INT_MESSAGE(314, r, "cg_array_at returned wrong val after cg_array_resize");
         else
@@ -121,16 +121,16 @@ void test_CGArray_swap(void) {
     cg_array_t *src = cg_array_create(10, sizeof(int32_t));
     int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign(src, AS_MEMORY(a)), "FAILED ASSIGN");
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign(src, CG_AS_MEMORY(a)), "FAILED ASSIGN");
 
     cg_array_t *dest = cg_array_create(5, sizeof(int));
 
     TEST_ASSERT_TRUE_MESSAGE(cg_array_swap(dest, src), "FAILED SWAP");
 
-    TEST_ASSERT_EQUAL_size_t_MESSAGE(cg_array_size(dest), 10, "WRONG SIZE ON SWAP");
-    for (int i = 0; i < cg_array_size(dest); i++) {
+    TEST_ASSERT_EQUAL_size_t_MESSAGE(cg_array_capacity(dest), 10, "WRONG SIZE ON SWAP");
+    for (int i = 0; i < cg_array_capacity(dest); i++) {
         int v;
-        cg_array_at(array, i, AS_MEMORY(v));
+        cg_array_at(array, i, CG_AS_MEMORY(v));
         TEST_ASSERT_EQUAL_INT32_MESSAGE(v, i + 1, "VALUES ARE DIFFERENT AFTER SWAP");
     }
     cg_array_destroy(src);
