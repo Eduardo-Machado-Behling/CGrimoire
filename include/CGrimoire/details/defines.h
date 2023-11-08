@@ -8,10 +8,15 @@
 
 typedef uint8_t byte_t;
 
-#define SAFE_ALLOC(ptr, size, onFail)                                                                                                                          \
+#define CG_SAFE_ALLOC(ptr, size, onFail)                                                                                                                       \
     ptr = malloc(size);                                                                                                                                        \
     if (!ptr) {                                                                                                                                                \
         onFail;                                                                                                                                                \
     }
 
-#define AS_MEMORY(x) (byte_t *)&x
+#define CG_AS_MEMORY(x) (byte_t *)&x
+
+#define CG_SAFE_CALL(x, onFail)                                                                                                                                \
+    if (!x) {                                                                                                                                                  \
+        onFail;                                                                                                                                                \
+    }
