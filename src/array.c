@@ -67,7 +67,7 @@ bool cg_array_at(const cg_array_t *array, size_t index, byte_t *dest) {
     return true;
 }
 
-bool cg_array_insert(cg_array_t *array, size_t index, const byte_t *data) {
+bool cg_array_change(cg_array_t *array, size_t index, const byte_t *data) {
     if (!array || !array->data.mem)
         return false;
 

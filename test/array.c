@@ -8,7 +8,7 @@ void setUp(void) { array = cg_array_create(10, sizeof(int32_t)); }
 void test_CGArray_copy(void) {
     for (size_t i = 0; i < cg_array_capacity(array); i++) {
         int32_t val = i * 5;
-        TEST_ASSERT_TRUE_MESSAGE(cg_array_insert(array, i, CG_AS_MEMORY(val)), "FAILED INSERT ON LOOP");
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_change(array, i, CG_AS_MEMORY(val)), "FAILED INSERT ON LOOP");
     }
 
     for (size_t i = 0; i < cg_array_capacity(array); i++) {
@@ -30,7 +30,7 @@ void test_CGArray_copy(void) {
 
 void test_CGArray_insert(void) {
     int a = 5;
-    TEST_ASSERT_TRUE(cg_array_insert(array, 0, CG_AS_MEMORY(a)));
+    TEST_ASSERT_TRUE(cg_array_change(array, 0, CG_AS_MEMORY(a)));
     int b = -1;
     cg_array_at(array, 0, CG_AS_MEMORY(b));
     TEST_ASSERT_EQUAL_INT32(a, b);

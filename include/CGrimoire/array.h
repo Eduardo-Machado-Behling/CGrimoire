@@ -40,7 +40,7 @@ bool cg_array_at(const cg_array_t *array, size_t index, byte_t *dest);
 /// @param index position that DATA will be inserted to.
 /// @param data a pointer of the same datatype as the ones the array holds. the value in this pointer will be inserted, use CG_AS_MEMORY(<var>).
 /// @return true if successful.
-bool cg_array_insert(cg_array_t *array, size_t index, const byte_t *data);
+bool cg_array_change(cg_array_t *array, size_t index, const byte_t *data);
 
 /// @param array a cg_array_t.
 /// @return the size of the array.

@@ -45,7 +45,7 @@ bool cg_vector_fill(cg_vector_t *vector, const byte_t *data, size_t amount) {
 
     vector->used = amount;
     for (size_t i = 0; i < vector->used; i++) {
-        CG_SAFE_CALL(cg_array_insert(vector->array, i, data), return false);
+        CG_SAFE_CALL(cg_array_change(vector->array, i, data), return false);
     }
 
     return true;
@@ -61,7 +61,7 @@ bool cg_vector_assign(cg_vector_t *vector, const byte_t *data, size_t amount) {
 
     vector->used = amount;
     for (size_t i = 0; i < vector->used; i++) {
-        CG_SAFE_CALL(cg_array_insert(vector->array, i, data + i * cg_array_element_size(vector->array)), return false);
+        CG_SAFE_CALL(cg_array_change(vector->array, i, data + i * cg_array_element_size(vector->array)), return false);
     }
 
     return true;
@@ -113,15 +113,54 @@ bool cg_vector_insert(cg_vector_t *vector, size_t index, const byte_t *data) {
     if (!vector || !vector->array || !(index < vector->used))
         return false;
 
-    return cg_array_insert(vector->array, index, data);
+    if (index == vector->used)
+        return cg_vector_push_back(vector, data);
+
+    if (vector->used + 1 >= cg_array_capacity(vector->array))
+        CG_SAFE_CALL(cg_vector_reserve(vector, cg_array_capacity(vector->array) * 2), return false;);
+
+    for (size_t i = vector->used - 1; i >= index; i--) {
+        CG_SAFE_CALL(cg_array_at(vector->array, i, vector->at), return false;);
+        CG_SAFE_CALL(cg_array_change(vector->array, i + 1, vector->at), return false;);
+    }
+    ++vector->used;
+    return cg_array_change(vector->array, index, data);
+}
+bool cg_vector_insert_range(cg_vector_t *vector, size_t index, byte_t *data, size_t data_amount) {
+    if (!vector || !vector->array || !(index < vector->used))
+        return false;
+
+    if (index == vector->used)
+        return cg_vector_push_back(vector, data);
+
+    if (vector->used + data_amount >= cg_array_capacity(vector->array))
+        CG_SAFE_CALL(cg_vector_reserve(vector, cg_array_capacity(vector->array) * 2), return false;);
+
+    for (size_t i = vector->used - 1; i >= index; i--) {
+        CG_SAFE_CALL(cg_array_at(vector->array, i, vector->at), return false;);
+        CG_SAFE_CALL(cg_array_change(vector->array, i + data_amount, vector->at), return false;);
+    }
+    vector->used += data_amount;
+    for (size_t i = 0; i < data_amount; i++) {
+        CG_SAFE_CALL(cg_array_change(vector->array, i + index, data + i * cg_array_element_size(vector->array)), return false;);
+    }
+
+    return cg_array_change(vector->array, index, data);
 }
 
-bool cg_vector_insert_range(cg_vector_t *vector, size_t index, byte_t *data, size_t data_amount) {
+bool cg_vector_change(cg_vector_t *vector, size_t index, const byte_t *data) {
+    if (!vector || !vector->array || !(index < vector->used))
+        return false;
+
+    return cg_array_change(vector->array, index, data);
+}
+
+bool cg_vector_change_range(cg_vector_t *vector, size_t index, byte_t *data, size_t data_amount) {
     if (!vector || !data)
         return false;
 
     for (size_t i = 0; i < vector->used && i < data_amount; i++)
-        CG_SAFE_CALL(cg_vector_insert(vector, i + index, data + i), return false);
+        CG_SAFE_CALL(cg_vector_change(vector, i + index, data + i * cg_array_element_size(vector->array)), return false);
 
     return true;
 }
@@ -133,10 +172,11 @@ bool cg_vector_erase(cg_vector_t *vector, size_t index) {
     if (index >= vector->used)
         return cg_vector_pop_back(vector);
 
-    for (size_t i = --vector->used; i >= index; i--) {
+    --vector->used;
+    for (size_t i = index; i < vector->used; ++i) {
 
-        CG_SAFE_CALL(cg_array_at(vector->array, i, vector->at), return false);
-        CG_SAFE_CALL(cg_array_insert(vector->array, i - 1, vector->at), return false);
+        CG_SAFE_CALL(cg_array_at(vector->array, i + 1, vector->at), return false);
+        CG_SAFE_CALL(cg_array_change(vector->array, i, vector->at), return false);
     }
 
     return true;
@@ -146,10 +186,10 @@ bool cg_vector_push_back(cg_vector_t *vector, const byte_t *data) {
     if (!vector)
         return false;
 
-    if (++vector->used == cg_array_capacity(vector->array))
+    if (++vector->used >= cg_array_capacity(vector->array))
         CG_SAFE_CALL(cg_array_reserve(vector->array, cg_array_capacity(vector->array) * 2), return false);
 
-    return cg_array_insert(vector->array, vector->used - 1, data);
+    return cg_array_change(vector->array, vector->used - 1, data);
 }
 
 bool cg_vector_push_back_range(cg_vector_t *vector, const byte_t *data, size_t data_amount) {
@@ -157,7 +197,7 @@ bool cg_vector_push_back_range(cg_vector_t *vector, const byte_t *data, size_t d
         return false;
 
     for (size_t i = 0; i < data_amount; i++)
-        CG_SAFE_CALL(cg_vector_push_back(vector, data + i), return false);
+        CG_SAFE_CALL(cg_vector_push_back(vector, data + i * cg_array_element_size(vector->array)), return false);
 
     return true;
 }
@@ -166,16 +206,16 @@ bool cg_vector_push_front(cg_vector_t *vector, const byte_t *data) {
     if (!vector)
         return false;
 
-    if (++vector->used == cg_array_capacity(vector->array))
+    if (++vector->used >= cg_array_capacity(vector->array))
         CG_SAFE_CALL(cg_array_reserve(vector->array, cg_array_capacity(vector->array) * 2), return false);
 
     for (size_t i = vector->used - 1; i > 0; i--) {
 
         CG_SAFE_CALL(cg_array_at(vector->array, i - 1, vector->at), return false);
-        CG_SAFE_CALL(cg_array_insert(vector->array, i, vector->at), return false);
+        CG_SAFE_CALL(cg_array_change(vector->array, i, vector->at), return false);
     }
 
-    CG_SAFE_CALL(cg_array_insert(vector->array, 0, data), return false);
+    CG_SAFE_CALL(cg_array_change(vector->array, 0, data), return false);
 
     return true;
 }
@@ -184,17 +224,17 @@ bool cg_vector_push_front_range(cg_vector_t *vector, const byte_t *data, size_t 
         return false;
 
     vector->used += data_amount;
-    if (vector->used == cg_array_capacity(vector->array))
+    if (vector->used >= cg_array_capacity(vector->array))
         CG_SAFE_CALL(cg_array_reserve(vector->array, cg_array_capacity(vector->array) * 2 + data_amount), return false);
 
     for (size_t i = vector->used - 1; i >= data_amount; --i) {
 
         CG_SAFE_CALL(cg_array_at(vector->array, i - data_amount, vector->at), return false);
-        CG_SAFE_CALL(cg_array_insert(vector->array, i, vector->at), return false);
+        CG_SAFE_CALL(cg_array_change(vector->array, i, vector->at), return false);
     }
 
     for (size_t i = 0; i < data_amount; i++) {
-        CG_SAFE_CALL(cg_array_insert(vector->array, i, data + i * cg_array_element_size(vector->array)), return false);
+        CG_SAFE_CALL(cg_array_change(vector->array, i, data + i * cg_array_element_size(vector->array)), return false);
     }
 
     return true;
@@ -206,6 +246,13 @@ bool cg_vector_pop_back(cg_vector_t *vector) {
 
     --vector->used;
     return true;
+}
+
+bool cg_vector_pop_front(cg_vector_t *vector) {
+    if (!vector || !vector->used)
+        return false;
+
+    return cg_vector_erase(vector, 0);
 }
 
 void cg_vector_clear(cg_vector_t *vector) { vector->used = 0; }

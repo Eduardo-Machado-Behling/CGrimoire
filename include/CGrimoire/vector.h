@@ -23,12 +23,16 @@ bool cg_vector_reserve(const cg_vector_t *vector, size_t amount);
 
 bool cg_vector_insert(cg_vector_t *vector, size_t index, const byte_t *data);
 bool cg_vector_insert_range(cg_vector_t *vector, size_t index, byte_t *data, size_t data_amount);
+bool cg_vector_change(cg_vector_t *vector, size_t index, const byte_t *data);
+bool cg_vector_change_range(cg_vector_t *vector, size_t index, byte_t *data, size_t data_amount);
+
 bool cg_vector_push_back(cg_vector_t *vector, const byte_t *data);
 bool cg_vector_push_back_range(cg_vector_t *vector, const byte_t *data, size_t data_amount);
 bool cg_vector_push_front(cg_vector_t *vector, const byte_t *data);
 bool cg_vector_push_front_range(cg_vector_t *vector, const byte_t *data, size_t data_amount);
 
 bool cg_vector_pop_back(cg_vector_t *vector);
+bool cg_vector_pop_front(cg_vector_t *vector);
 bool cg_vector_erase(cg_vector_t *vector, size_t index);
 void cg_vector_clear(cg_vector_t *vector);
 
