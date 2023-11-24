@@ -13,3 +13,5 @@ endmacro(test_component)
 
 test_component(array)
 test_component(vector)
+test_component(stack)
+test_component(queue)

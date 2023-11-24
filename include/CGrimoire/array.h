@@ -21,7 +21,9 @@ cg_array_t *cg_array_create(size_t capacity, size_t element_size_in_bytes);
 /// @param other the cg_array to copy from.
 /// @return return a heap copy of the OTHER array, that will need to be cleared with cg_array_destroy().
 /// can return NULL if the memory allocation fails or OTHER is a invalid cg_array_t.
-cg_array_t *cg_array_copy(const cg_array_t *other);
+cg_array_t *cg_array_copy(cg_array_t *array, const cg_array_t *other);
+
+cg_array_t *cg_array_move(cg_array_t *array, cg_array_t **other);
 
 /// @brief resizes a cg_array_t to be NEW_SIZE long
 /// @param array a initialized cg_array_t.

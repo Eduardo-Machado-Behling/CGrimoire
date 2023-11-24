@@ -5,7 +5,56 @@ cg_vector_t *vector;
 
 void setUp(void) { vector = cg_vector_create(10, sizeof(int32_t)); }
 
-void test_CGArray_copy(void) {}
+void test_CGVector_copy(void) {
+    cg_vector_clear(vector);
+
+    size_t cap = cg_vector_capacity(vector);
+    for (size_t i = 0; i < cap; i++) {
+        int32_t val = i * 5;
+        TEST_ASSERT_TRUE_MESSAGE(cg_vector_push_back(vector, CG_AS_MEMORY(val)), "FAILED INSERT ON LOOP");
+    }
+
+    for (size_t i = 0; i < cg_vector_size(vector); i++) {
+        int val;
+        TEST_ASSERT_TRUE_MESSAGE(cg_vector_at(vector, i, CG_AS_MEMORY(val)), "FAILED AT ON LOOP");
+        TEST_ASSERT_EQUAL_INT32_MESSAGE(i * 5, val, "AT IN LOOP RETURNED WRONG NUMBER");
+    }
+
+    cg_vector_t *copied = cg_vector_copy(NULL, vector);
+    for (size_t i = 0; i < cg_vector_size(vector); i++) {
+        int val_copied, val_vector;
+        TEST_ASSERT_TRUE_MESSAGE(cg_vector_at(vector, i, CG_AS_MEMORY(val_vector)), "FAILED VECTOR.AT ON COMPARE LOOP");
+        TEST_ASSERT_TRUE_MESSAGE(cg_vector_at(copied, i, CG_AS_MEMORY(val_copied)), "FAILED COPIED.AT ON COMPARE LOOP");
+        TEST_ASSERT_EQUAL_INT32_MESSAGE(val_vector, val_copied, "VALUES ARE DIFFERENT ON COPY");
+    }
+
+    cg_vector_destroy(copied);
+}
+
+void test_CGVector_move(void) {
+    cg_vector_clear(vector);
+
+    size_t cap = cg_vector_capacity(vector);
+    for (size_t i = 0; i < cap; i++) {
+        int32_t val = i * 5;
+        TEST_ASSERT_TRUE_MESSAGE(cg_vector_push_back(vector, CG_AS_MEMORY(val)), "FAILED INSERT ON LOOP");
+    }
+
+    for (size_t i = 0; i < cg_vector_size(vector); i++) {
+        int val;
+        TEST_ASSERT_TRUE_MESSAGE(cg_vector_at(vector, i, CG_AS_MEMORY(val)), "FAILED AT ON LOOP");
+        TEST_ASSERT_EQUAL_INT32_MESSAGE(i * 5, val, "AT IN LOOP RETURNED WRONG NUMBER");
+    }
+
+    cg_vector_t *moved = cg_vector_move(NULL, &vector);
+    for (size_t i = 0; i < cg_vector_size(moved); i++) {
+        int val_moved;
+        TEST_ASSERT_TRUE_MESSAGE(cg_vector_at(moved, i, CG_AS_MEMORY(val_moved)), "FAILED MOVED.AT ON COMPARE LOOP");
+        TEST_ASSERT_EQUAL_INT32_MESSAGE(i * 5, val_moved, "VALUES ARE DIFFERENT ON COPY");
+    }
+
+    cg_vector_destroy(moved);
+}
 
 void test_CGVector_push_back(void) {
     cg_vector_clear(vector);
@@ -249,13 +298,13 @@ void test_CGVector_iterator(void) {
     cg_iterator_destroy(it);
 }
 
-void test_CGArray_swap(void) {}
-
 void tearDown(void) { cg_vector_destroy(vector); }
 
 int main(void) {
     UNITY_BEGIN();
 
+    RUN_TEST(test_CGVector_copy);
+    RUN_TEST(test_CGVector_move);
     RUN_TEST(test_CGVector_push_back);
     RUN_TEST(test_CGVector_push_back_range);
     RUN_TEST(test_CGVector_push_front);
@@ -269,7 +318,7 @@ int main(void) {
     RUN_TEST(test_CGVector_erase);
     RUN_TEST(test_CGVector_insert);
     RUN_TEST(test_CGVector_insert_range);
-    // RUN_TEST(test_CGVector_iterator);
+    RUN_TEST(test_CGVector_iterator);
 
     return UNITY_END();
 }

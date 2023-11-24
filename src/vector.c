@@ -30,12 +30,35 @@ cg_vector_t *cg_vector_create(size_t capacity, size_t element_size_in_bytes) {
     return vector;
 }
 
-cg_vector_t *cg_vector_copy(const cg_vector_t *other) {
-    cg_vector_t *vector;
-    CG_SAFE_ALLOC(vector, sizeof(cg_vector_t), return NULL);
+cg_vector_t *cg_vector_copy(cg_vector_t *vector, const cg_vector_t *other) {
+    if (!vector)
+        vector = cg_vector_create(cg_array_capacity(other->array), cg_array_element_size(other->array));
 
-    vector->array = cg_array_copy(other->array);
+    vector->array = cg_array_copy(NULL, other->array);
     vector->used = other->used;
+    memcpy(vector->at, other->at, cg_array_element_size(other->array));
+
+    return vector;
+}
+
+cg_vector_t *cg_vector_move(cg_vector_t *vector, cg_vector_t **other) {
+    if (!vector)
+        CG_SAFE_ALLOC(vector, sizeof(cg_vector_t), return NULL);
+
+    vector->array = (*other)->array;
+    vector->used = (*other)->used;
+    vector->at = (*other)->at;
+    vector->begin = (*other)->begin;
+    vector->end = (*other)->end;
+
+    (*other)->array = NULL;
+    (*other)->used = 0;
+    (*other)->end = NULL;
+    (*other)->begin = NULL;
+    (*other)->at = NULL;
+
+    cg_vector_destroy(*other);
+    *other = NULL;
 
     return vector;
 }
@@ -107,6 +130,9 @@ size_t cg_vector_capacity(const cg_vector_t *vector) {
 
     return cg_array_capacity(vector->array);
 }
+
+size_t cg_vector_element_size(const cg_vector_t *vector) { return cg_array_element_size(vector->array); }
+
 bool cg_vector_reserve(const cg_vector_t *vector, size_t amount) {
     if (!vector || !vector->array)
         return false;

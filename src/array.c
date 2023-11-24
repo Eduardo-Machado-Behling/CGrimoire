@@ -27,20 +27,31 @@ cg_array_t *cg_array_create(size_t capacity, size_t element_size_in_bytes) {
     return array;
 }
 
-cg_array_t *cg_array_copy(const cg_array_t *other) {
-    if (!other)
-        return NULL;
+cg_array_t *cg_array_copy(cg_array_t *array, const cg_array_t *other) {
+    if (!array)
+        array = cg_array_create(other->capacity, other->data.size);
 
-    cg_array_t *array;
-    CG_SAFE_ALLOC(array, sizeof(cg_array_t), return NULL);
-
-    array->data.size = other->data.size;
-    array->capacity = other->capacity;
-    array->end = other->end;
-    array->begin = other->begin;
-
-    CG_SAFE_ALLOC(array->data.mem, array->capacity * array->data.size, free(array); return NULL);
     memcpy(array->data.mem, other->data.mem, array->capacity * array->data.size);
+
+    return array;
+}
+
+cg_array_t *cg_array_move(cg_array_t *array, cg_array_t **other) {
+    if (!array)
+        CG_SAFE_ALLOC(array, sizeof(cg_array_t), return NULL);
+
+    array->data.mem = (*other)->data.mem;
+    array->data.size = (*other)->data.size;
+    array->capacity = (*other)->capacity;
+    array->end = (*other)->end;
+    array->begin = (*other)->begin;
+
+    (*other)->data.mem = NULL;
+    (*other)->end = NULL;
+    (*other)->begin = NULL;
+
+    cg_array_destroy(*other);
+    *other = NULL;
 
     return array;
 }

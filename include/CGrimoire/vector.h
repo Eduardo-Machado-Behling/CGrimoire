@@ -8,7 +8,8 @@
 typedef struct cg_vector_t cg_vector_t;
 
 cg_vector_t *cg_vector_create(size_t capacity, size_t element_size_in_bytes);
-cg_vector_t *cg_vector_copy(const cg_vector_t *other);
+cg_vector_t *cg_vector_copy(cg_vector_t *vector, const cg_vector_t *other);
+cg_vector_t *cg_vector_move(cg_vector_t *vector, cg_vector_t **other);
 
 bool cg_vector_fill(cg_vector_t *vector, const byte_t *data, size_t amount);
 bool cg_vector_assign(cg_vector_t *vector, const byte_t *data, size_t amount);
@@ -20,6 +21,7 @@ bool cg_vector_back(const cg_vector_t *vector, byte_t *dest);
 bool cg_vector_empty(const cg_vector_t *vector);
 size_t cg_vector_size(const cg_vector_t *vector);
 size_t cg_vector_capacity(const cg_vector_t *vector);
+size_t cg_vector_element_size(const cg_vector_t *vector);
 bool cg_vector_reserve(const cg_vector_t *vector, size_t amount);
 
 bool cg_vector_insert(cg_vector_t *vector, size_t index, const byte_t *data);

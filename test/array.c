@@ -17,7 +17,7 @@ void test_CGArray_copy(void) {
         TEST_ASSERT_EQUAL_INT32_MESSAGE(i * 5, val, "AT IN LOOP RETURNED WRONG NUMBER");
     }
 
-    cg_array_t *copied = cg_array_copy(array);
+    cg_array_t *copied = cg_array_copy(NULL, array);
     for (size_t i = 0; i < cg_array_capacity(array); i++) {
         int val_copied, val_array;
         TEST_ASSERT_TRUE_MESSAGE(cg_array_at(array, i, CG_AS_MEMORY(val_array)), "FAILED ARRAY.AT ON COMPARE LOOP");
@@ -26,6 +26,31 @@ void test_CGArray_copy(void) {
     }
 
     cg_array_destroy(copied);
+}
+
+void test_CGArray_move(void) {
+    cg_array_t *src = cg_array_create(10, sizeof(int));
+
+    for (size_t i = 0; i < cg_array_capacity(src); i++) {
+        int32_t val = i * 5;
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_change(src, i, CG_AS_MEMORY(val)), "FAILED INSERT ON LOOP");
+    }
+
+    for (size_t i = 0; i < cg_array_capacity(src); i++) {
+        int val;
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(src, i, CG_AS_MEMORY(val)), "FAILED AT ON LOOP");
+        TEST_ASSERT_EQUAL_INT32_MESSAGE(i * 5, val, "AT IN LOOP RETURNED WRONG NUMBER");
+    }
+
+    cg_array_t *moved = cg_array_move(NULL, &src);
+    for (size_t i = 0; i < cg_array_capacity(moved); i++) {
+        int val_moved;
+        TEST_ASSERT_TRUE_MESSAGE(cg_array_at(moved, i, CG_AS_MEMORY(val_moved)), "FAILED ARRAY.AT ON COMPARE LOOP");
+        TEST_ASSERT_EQUAL_INT_MESSAGE(i * 5, val_moved, "VALUES ARE DIFFERENT ON COPY");
+    }
+
+    cg_array_destroy(moved);
+    cg_array_destroy(src);
 }
 
 void test_CGArray_insert(void) {
@@ -168,6 +193,7 @@ int main(void) {
 
     RUN_TEST(test_CGArray_insert);
     RUN_TEST(test_CGArray_copy);
+    RUN_TEST(test_CGArray_move);
     RUN_TEST(test_CGArray_fill);
     RUN_TEST(test_CGArray_reserve);
     RUN_TEST(test_CGArray_resize);
