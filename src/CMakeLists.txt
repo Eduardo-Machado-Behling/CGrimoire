@@ -4,6 +4,8 @@ file(
     *.c
 )
 
+message("src: ${SOURCE_FILES}")
+
 add_library(CGrimoire ${SOURCE_FILES})
 
 target_include_directories(CGrimoire PUBLIC

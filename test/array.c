@@ -136,6 +136,31 @@ void test_CGArray_swap(void) {
     cg_array_destroy(src);
 }
 
+void test_CGArray_iterator(void) {
+    cg_array_t *src = cg_array_create(10, sizeof(int32_t));
+    int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    TEST_ASSERT_TRUE_MESSAGE(cg_array_assign(src, CG_AS_MEMORY(a)), "FAILED ASSIGN");
+
+    size_t i = 0;
+    iterator_t *it = cg_array_begin(src, NULL);
+    for (; cg_iterator_distance(it, cg_array_cend(src)) > 0; i++, cg_iterator_next(it, 1)) {
+        int v = CG_ITERATOR_GET_DATA(it, int);
+        TEST_ASSERT_EQUAL_INT(v, a[i]);
+        a[i] *= 2;
+        cg_iterator_set_data(it, CG_AS_MEMORY(a[i]));
+    }
+
+    i = 0;
+    it = cg_array_begin(src, it);
+    for (; cg_iterator_distance(it, cg_array_cend(src)) > 0; i++, cg_iterator_next(it, 1)) {
+        int v = CG_ITERATOR_GET_DATA(it, int);
+        TEST_ASSERT_EQUAL_INT(v, a[i]);
+    }
+    cg_iterator_destroy(it);
+    cg_array_destroy(src);
+}
+
 void tearDown(void) { cg_array_destroy(array); }
 
 int main(void) {
@@ -148,6 +173,7 @@ int main(void) {
     RUN_TEST(test_CGArray_resize);
     RUN_TEST(test_CGArray_assign);
     RUN_TEST(test_CGArray_assign_range);
+    RUN_TEST(test_CGArray_iterator);
 
     return UNITY_END();
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CGrimoire/details/defines.h"
+#include "CGrimoire/iterator.h"
 
 #define CG_VECTOR_NPOS SIZE_MAX
 
@@ -25,6 +26,11 @@ bool cg_vector_insert(cg_vector_t *vector, size_t index, const byte_t *data);
 bool cg_vector_insert_range(cg_vector_t *vector, size_t index, byte_t *data, size_t data_amount);
 bool cg_vector_change(cg_vector_t *vector, size_t index, const byte_t *data);
 bool cg_vector_change_range(cg_vector_t *vector, size_t index, byte_t *data, size_t data_amount);
+
+iterator_t *cg_vector_begin(cg_vector_t *vector, iterator_t *iterator);
+iterator_t *cg_vector_end(cg_vector_t *vector, iterator_t *iterator);
+const iterator_t *cg_vector_cbegin(cg_vector_t *vector);
+const iterator_t *cg_vector_cend(cg_vector_t *vector);
 
 bool cg_vector_push_back(cg_vector_t *vector, const byte_t *data);
 bool cg_vector_push_back_range(cg_vector_t *vector, const byte_t *data, size_t data_amount);

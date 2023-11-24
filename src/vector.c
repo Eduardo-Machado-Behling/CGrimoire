@@ -7,6 +7,9 @@ typedef struct cg_vector_t {
 
     // for method aux propose
     byte_t *at;
+
+    iterator_t *begin;
+    iterator_t *end;
 } cg_vector_t;
 
 cg_vector_t *cg_vector_create(size_t capacity, size_t element_size_in_bytes) {
@@ -21,6 +24,8 @@ cg_vector_t *cg_vector_create(size_t capacity, size_t element_size_in_bytes) {
     }
 
     vector->used = 0;
+    vector->begin = NULL;
+    vector->end = NULL;
 
     return vector;
 }
@@ -165,6 +170,23 @@ bool cg_vector_change_range(cg_vector_t *vector, size_t index, byte_t *data, siz
     return true;
 }
 
+iterator_t *cg_vector_begin(cg_vector_t *vector, iterator_t *iterator) { return cg_array_begin(vector->array, iterator); }
+iterator_t *cg_vector_end(cg_vector_t *vector, iterator_t *iterator) {
+    iterator_t *it = cg_array_begin(vector->array, iterator);
+    cg_iterator_next(it, vector->used);
+    return it;
+}
+
+const iterator_t *cg_vector_cbegin(cg_vector_t *vector) { return cg_array_cbegin(vector->array); }
+const iterator_t *cg_vector_cend(cg_vector_t *vector) {
+    if (!vector->end) {
+        CG_SAFE_CALL(vector->end = cg_iterator_create(), return NULL;);
+    }
+    cg_array_begin(vector->array, vector->end);
+    cg_iterator_next(vector->end, vector->used);
+    return vector->end;
+}
+
 bool cg_vector_erase(cg_vector_t *vector, size_t index) {
     if (!vector)
         return false;
@@ -275,6 +297,10 @@ void cg_vector_destroy(cg_vector_t *vector) {
 
         if (vector->at)
             free(vector->at);
+        if (vector->begin)
+            cg_iterator_destroy(vector->begin);
+        if (vector->end)
+            cg_iterator_destroy(vector->end);
 
         free(vector);
     }

@@ -17,6 +17,6 @@ typedef uint8_t byte_t;
 #define CG_AS_MEMORY(x) (byte_t *)&(x)
 
 #define CG_SAFE_CALL(x, onFail)                                                                                                                                \
-    if (!x) {                                                                                                                                                  \
+    if (!(x)) {                                                                                                                                                \
         onFail;                                                                                                                                                \
     }

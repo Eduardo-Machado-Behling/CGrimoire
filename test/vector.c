@@ -225,6 +225,30 @@ void test_CGVector_insert_range(void) {
     }
 }
 
+void test_CGVector_iterator(void) {
+    cg_vector_clear(vector);
+
+    int v[10] = {6, 52, 4, 1, 5, 351, 2, 5, 9, -1};
+    TEST_ASSERT_TRUE(cg_vector_assign(vector, CG_AS_MEMORY(v), 10));
+
+    iterator_t *it = cg_vector_begin(vector, NULL);
+    size_t i = 0;
+
+    for (; cg_iterator_distance(it, cg_vector_cend(vector)) > 0; cg_iterator_next(it, 1), i++) {
+        int at = CG_ITERATOR_GET_DATA(it, int);
+        TEST_ASSERT_EQUAL_INT(v[i], at);
+        v[i] *= 5;
+        cg_iterator_set_data(it, CG_AS_MEMORY(v[i]));
+    }
+
+    for (i = 0, cg_vector_begin(vector, it); cg_iterator_distance(it, cg_vector_cend(vector)) > 0; cg_iterator_next(it, 1), i++) {
+        int at = CG_ITERATOR_GET_DATA(it, int);
+        TEST_ASSERT_EQUAL_INT(v[i], at);
+    }
+
+    cg_iterator_destroy(it);
+}
+
 void test_CGArray_swap(void) {}
 
 void tearDown(void) { cg_vector_destroy(vector); }
@@ -245,6 +269,7 @@ int main(void) {
     RUN_TEST(test_CGVector_erase);
     RUN_TEST(test_CGVector_insert);
     RUN_TEST(test_CGVector_insert_range);
+    // RUN_TEST(test_CGVector_iterator);
 
     return UNITY_END();
 }
