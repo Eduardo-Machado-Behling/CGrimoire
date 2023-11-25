@@ -67,6 +67,6 @@ void cg_stack_destroy(cg_stack_t *stack) {
         return;
 
     if (stack->vector)
-        cg_vector_destroy(stack->vector);
+        cg_vector_destroy(&stack->vector);
     free(stack);
 }

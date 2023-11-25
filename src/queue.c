@@ -67,6 +67,6 @@ void cg_queue_destroy(cg_queue_t *queue) {
         return;
 
     if (queue->vector)
-        cg_vector_destroy(queue->vector);
+        cg_vector_destroy(&queue->vector);
     free(queue);
 }

@@ -25,7 +25,7 @@ void test_CGArray_copy(void) {
         TEST_ASSERT_EQUAL_INT32_MESSAGE(val_array, val_copied, "VALUES ARE DIFFERENT ON COPY");
     }
 
-    cg_array_destroy(copied);
+    cg_array_destroy(&copied);
 }
 
 void test_CGArray_move(void) {
@@ -49,8 +49,8 @@ void test_CGArray_move(void) {
         TEST_ASSERT_EQUAL_INT_MESSAGE(i * 5, val_moved, "VALUES ARE DIFFERENT ON COPY");
     }
 
-    cg_array_destroy(moved);
-    cg_array_destroy(src);
+    cg_array_destroy(&moved);
+    cg_array_destroy(&src);
 }
 
 void test_CGArray_insert(void) {
@@ -101,7 +101,7 @@ void test_CGArray_assign_range(void) {
             TEST_ASSERT_EQUAL_INT32_MESSAGE(v, i - 4, "VALUES ARE DIFFERENT AFTER ASSIGN_RANGE");
     }
 
-    cg_array_destroy(a);
+    cg_array_destroy(&a);
 }
 
 void test_CGArray_reserve(void) {
@@ -119,7 +119,7 @@ void test_CGArray_reserve(void) {
         TEST_ASSERT_EQUAL_INT_MESSAGE(v, r, "cg_array_at returned wrong val after cg_array_reserve");
     }
 
-    cg_array_destroy(src);
+    cg_array_destroy(&src);
 }
 
 void test_CGArray_resize(void) {
@@ -139,7 +139,7 @@ void test_CGArray_resize(void) {
             TEST_ASSERT_EQUAL_INT_MESSAGE(2004, r, "cg_array_at returned wrong val after cg_array_resize");
     }
 
-    cg_array_destroy(src);
+    cg_array_destroy(&src);
 }
 
 void test_CGArray_swap(void) {
@@ -158,7 +158,7 @@ void test_CGArray_swap(void) {
         cg_array_at(array, i, CG_AS_MEMORY(v));
         TEST_ASSERT_EQUAL_INT32_MESSAGE(v, i + 1, "VALUES ARE DIFFERENT AFTER SWAP");
     }
-    cg_array_destroy(src);
+    cg_array_destroy(&src);
 }
 
 void test_CGArray_iterator(void) {
@@ -168,7 +168,7 @@ void test_CGArray_iterator(void) {
     TEST_ASSERT_TRUE_MESSAGE(cg_array_assign(src, CG_AS_MEMORY(a)), "FAILED ASSIGN");
 
     size_t i = 0;
-    iterator_t *it = cg_array_begin(src, NULL);
+    cg_iterator_t *it = cg_array_begin(src, NULL);
     for (; cg_iterator_distance(it, cg_array_cend(src)) > 0; i++, cg_iterator_next(it, 1)) {
         int v = CG_ITERATOR_GET_DATA(it, int);
         TEST_ASSERT_EQUAL_INT(v, a[i]);
@@ -183,10 +183,10 @@ void test_CGArray_iterator(void) {
         TEST_ASSERT_EQUAL_INT(v, a[i]);
     }
     cg_iterator_destroy(it);
-    cg_array_destroy(src);
+    cg_array_destroy(&src);
 }
 
-void tearDown(void) { cg_array_destroy(array); }
+void tearDown(void) { cg_array_destroy(&array); }
 
 int main(void) {
     UNITY_BEGIN();

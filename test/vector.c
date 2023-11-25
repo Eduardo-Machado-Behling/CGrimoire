@@ -28,7 +28,7 @@ void test_CGVector_copy(void) {
         TEST_ASSERT_EQUAL_INT32_MESSAGE(val_vector, val_copied, "VALUES ARE DIFFERENT ON COPY");
     }
 
-    cg_vector_destroy(copied);
+    cg_vector_destroy(&copied);
 }
 
 void test_CGVector_move(void) {
@@ -53,7 +53,7 @@ void test_CGVector_move(void) {
         TEST_ASSERT_EQUAL_INT32_MESSAGE(i * 5, val_moved, "VALUES ARE DIFFERENT ON COPY");
     }
 
-    cg_vector_destroy(moved);
+    cg_vector_destroy(&moved);
 }
 
 void test_CGVector_push_back(void) {
@@ -280,7 +280,7 @@ void test_CGVector_iterator(void) {
     int v[10] = {6, 52, 4, 1, 5, 351, 2, 5, 9, -1};
     TEST_ASSERT_TRUE(cg_vector_assign(vector, CG_AS_MEMORY(v), 10));
 
-    iterator_t *it = cg_vector_begin(vector, NULL);
+    cg_iterator_t *it = cg_vector_begin(vector, NULL);
     size_t i = 0;
 
     for (; cg_iterator_distance(it, cg_vector_cend(vector)) > 0; cg_iterator_next(it, 1), i++) {
@@ -298,7 +298,7 @@ void test_CGVector_iterator(void) {
     cg_iterator_destroy(it);
 }
 
-void tearDown(void) { cg_vector_destroy(vector); }
+void tearDown(void) { cg_vector_destroy(&vector); }
 
 int main(void) {
     UNITY_BEGIN();

@@ -10,6 +10,8 @@
 /// and the cg_array_* methods to manipulate this data structure.
 typedef struct cg_array_t cg_array_t;
 
+size_t cg_array_sizeof(void);
+
 /// @brief creates a array, the ownership is yours.
 /// @param capacity how many elements to store.
 /// @param element_size_in_bytes how many Bytes each element occupy. use sizeof()
@@ -61,11 +63,11 @@ cg_array_t *cg_array_assign(cg_array_t *array, const byte_t *c_array);
 
 cg_array_t *cg_array_assign_range(cg_array_t *array, size_t start, const byte_t *c_array, size_t c_array_sizes);
 
-iterator_t *cg_array_begin(cg_array_t *array, iterator_t *it);
-iterator_t *cg_array_end(cg_array_t *array, iterator_t *it);
+cg_iterator_t *cg_array_begin(cg_array_t *array, cg_iterator_t *it);
+cg_iterator_t *cg_array_end(cg_array_t *array, cg_iterator_t *it);
 
-const iterator_t *cg_array_cbegin(cg_array_t *array);
-const iterator_t *cg_array_cend(cg_array_t *array);
+const cg_iterator_t *cg_array_cbegin(cg_array_t *array);
+const cg_iterator_t *cg_array_cend(cg_array_t *array);
 
 /// @brief swaps the contents of DEST with SOURCE
 /// @return true if successful
@@ -86,4 +88,4 @@ cg_array_t *cg_array_resize(cg_array_t *array, size_t new_size, const byte_t *da
 
 /// @brief free appropriately a instance of cg_array_t.
 /// @param array the cg_array_t.
-void cg_array_destroy(cg_array_t *array);
+void cg_array_destroy(cg_array_t **array);

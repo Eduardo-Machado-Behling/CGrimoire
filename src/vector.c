@@ -8,9 +8,11 @@ typedef struct cg_vector_t {
     // for method aux propose
     byte_t *at;
 
-    iterator_t *begin;
-    iterator_t *end;
+    cg_iterator_t *begin;
+    cg_iterator_t *end;
 } cg_vector_t;
+
+size_t cg_vector_sizeof(void) { return sizeof(cg_vector_t); }
 
 cg_vector_t *cg_vector_create(size_t capacity, size_t element_size_in_bytes) {
     cg_vector_t *vector;
@@ -57,7 +59,7 @@ cg_vector_t *cg_vector_move(cg_vector_t *vector, cg_vector_t **other) {
     (*other)->begin = NULL;
     (*other)->at = NULL;
 
-    cg_vector_destroy(*other);
+    cg_vector_destroy(other);
     *other = NULL;
 
     return vector;
@@ -144,7 +146,7 @@ bool cg_vector_insert(cg_vector_t *vector, size_t index, const byte_t *data) {
     if (!vector || !vector->array || !(index < vector->used))
         return false;
 
-    if (index == vector->used)
+    if (index >= vector->used)
         return cg_vector_push_back(vector, data);
 
     if (vector->used + 1 >= cg_array_capacity(vector->array))
@@ -196,15 +198,15 @@ bool cg_vector_change_range(cg_vector_t *vector, size_t index, byte_t *data, siz
     return true;
 }
 
-iterator_t *cg_vector_begin(cg_vector_t *vector, iterator_t *iterator) { return cg_array_begin(vector->array, iterator); }
-iterator_t *cg_vector_end(cg_vector_t *vector, iterator_t *iterator) {
-    iterator_t *it = cg_array_begin(vector->array, iterator);
+cg_iterator_t *cg_vector_begin(cg_vector_t *vector, cg_iterator_t *iterator) { return cg_array_begin(vector->array, iterator); }
+cg_iterator_t *cg_vector_end(cg_vector_t *vector, cg_iterator_t *iterator) {
+    cg_iterator_t *it = cg_array_begin(vector->array, iterator);
     cg_iterator_next(it, vector->used);
     return it;
 }
 
-const iterator_t *cg_vector_cbegin(cg_vector_t *vector) { return cg_array_cbegin(vector->array); }
-const iterator_t *cg_vector_cend(cg_vector_t *vector) {
+const cg_iterator_t *cg_vector_cbegin(cg_vector_t *vector) { return cg_array_cbegin(vector->array); }
+const cg_iterator_t *cg_vector_cend(cg_vector_t *vector) {
     if (!vector->end) {
         CG_SAFE_CALL(vector->end = cg_iterator_create(), return NULL;);
     }
@@ -317,17 +319,23 @@ bool cg_vector_resize(cg_vector_t *vector, size_t amount, const byte_t *data) {
     return true;
 }
 
-void cg_vector_destroy(cg_vector_t *vector) {
-    if (vector) {
-        cg_array_destroy(vector->array);
+void cg_vector_destroy(cg_vector_t **vector) {
+    if (!vector)
+        return;
 
-        if (vector->at)
-            free(vector->at);
-        if (vector->begin)
-            cg_iterator_destroy(vector->begin);
-        if (vector->end)
-            cg_iterator_destroy(vector->end);
+    cg_vector_t *vec = *vector;
+    vector = NULL;
+    if (!vec)
+        return;
 
-        free(vector);
-    }
+    cg_array_destroy(&vec->array);
+
+    if (vec->at)
+        free(vec->at);
+    if (vec->begin)
+        cg_iterator_destroy(vec->begin);
+    if (vec->end)
+        cg_iterator_destroy(vec->end);
+
+    free(vec);
 }

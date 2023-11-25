@@ -8,10 +8,12 @@ typedef struct cg_array_t {
     } data;
     size_t capacity;
 
-    iterator_t *end;
-    iterator_t *begin;
+    cg_iterator_t *end;
+    cg_iterator_t *begin;
 
 } cg_array_t;
+
+size_t cg_array_sizeof(void) { return sizeof(cg_array_t); }
 
 cg_array_t *cg_array_create(size_t capacity, size_t element_size_in_bytes) {
     cg_array_t *array;
@@ -50,7 +52,7 @@ cg_array_t *cg_array_move(cg_array_t *array, cg_array_t **other) {
     (*other)->end = NULL;
     (*other)->begin = NULL;
 
-    cg_array_destroy(*other);
+    cg_array_destroy(other);
     *other = NULL;
 
     return array;
@@ -94,8 +96,7 @@ cg_array_t *cg_array_change(cg_array_t *array, size_t index, const byte_t *data)
         return NULL;
 
     size_t is = index * array->data.size;
-    for (size_t i = 0; i < array->data.size; i++)
-        array->data.mem[is + i] = data[i];
+    memcpy(array->data.mem + is, data, array->data.size);
 
     return array;
 }
@@ -133,7 +134,7 @@ cg_array_t *cg_array_assign_range(cg_array_t *array, size_t start, const byte_t 
     return array;
 }
 
-iterator_t *cg_array_begin(cg_array_t *array, iterator_t *iterator) {
+cg_iterator_t *cg_array_begin(cg_array_t *array, cg_iterator_t *iterator) {
     if (!iterator)
         iterator = cg_iterator_create();
 
@@ -142,7 +143,7 @@ iterator_t *cg_array_begin(cg_array_t *array, iterator_t *iterator) {
 
     return iterator;
 }
-iterator_t *cg_array_end(cg_array_t *array, iterator_t *iterator) {
+cg_iterator_t *cg_array_end(cg_array_t *array, cg_iterator_t *iterator) {
     if (!iterator)
         iterator = cg_iterator_create();
 
@@ -152,7 +153,7 @@ iterator_t *cg_array_end(cg_array_t *array, iterator_t *iterator) {
     return iterator;
 }
 
-const iterator_t *cg_array_cbegin(cg_array_t *array) {
+const cg_iterator_t *cg_array_cbegin(cg_array_t *array) {
     if (!array)
         return NULL;
 
@@ -163,7 +164,7 @@ const iterator_t *cg_array_cbegin(cg_array_t *array) {
     }
     return array->begin;
 }
-const iterator_t *cg_array_cend(cg_array_t *array) {
+const cg_iterator_t *cg_array_cend(cg_array_t *array) {
     if (!array)
         return NULL;
 
@@ -226,15 +227,19 @@ cg_array_t *cg_array_resize(cg_array_t *array, size_t new_size, const byte_t *da
     return array;
 }
 
-void cg_array_destroy(cg_array_t *array) {
+void cg_array_destroy(cg_array_t **array) {
     if (!array)
         return;
+    cg_array_t *arr = *array;
+    if (!arr)
+        return;
 
-    if (array->data.mem)
-        free(array->data.mem);
-    if (array->end)
-        cg_iterator_destroy(array->end);
-    if (array->begin)
-        cg_iterator_destroy(array->begin);
-    free(array);
+    if (arr->data.mem)
+        free(arr->data.mem);
+    if (arr->end)
+        cg_iterator_destroy(arr->end);
+    if (arr->begin)
+        cg_iterator_destroy(arr->begin);
+    free(arr);
+    array = NULL;
 }
